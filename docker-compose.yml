@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: bankapp-postgres
+    environment:
+      POSTGRES_DB: bankdb
+      POSTGRES_USER: bankuser
+      POSTGRES_PASSWORD: bankpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bankuser -d bankdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bankapp-network
+
+  app:
+    build: .
+    container_name: bankapp
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: bankdb
+      DB_USER: bankuser
+      DB_PASSWORD: bankpass
+      JWT_SECRET: super-secret-key-change-in-production-min-256-bits
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bankapp-network
+
+volumes:
+  postgres-data:
+
+networks:
+  bankapp-network:
+    driver: bridge
