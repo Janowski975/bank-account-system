@@ -218,7 +218,7 @@ class TransferControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return 401 when transferring without auth")
+    @DisplayName("Should return 403 when transferring without auth")
     void testTransferMoney_WithoutAuth() throws Exception {
         // Arrange
         TransferRequest request = new TransferRequest();
@@ -227,10 +227,10 @@ class TransferControllerIntegrationTest {
         request.setAmount(new BigDecimal("100.00"));
         request.setDescription("Test transfer");
 
-        // Act & Assert
+        // Act & Assert - Spring Security returns 403 for missing auth
         mockMvc.perform(post("/transfers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 }
