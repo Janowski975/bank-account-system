@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: bank-account-system-test
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+
+  liquibase:
+    enabled: false
+
+server:
+  port: 0
+
+app:
+  jwt:
+    secret: test-secret-key-for-testing-purposes-must-be-very-long-at-least-256-bits-long
+    expiration-ms: 3600000
+    refresh-expiration-ms: 604800000
+
+logging:
+  level:
+    root: ERROR
+    pl.proggo.bankapp: INFO
