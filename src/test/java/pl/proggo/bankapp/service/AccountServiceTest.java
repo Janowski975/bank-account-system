@@ -191,9 +191,6 @@ class AccountServiceTest {
     @Test
     @DisplayName("Should throw BusinessException when creating account with null request")
     void testCreateAccount_WithNullRequest() {
-        // Arrange
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
-
         // Act & Assert
         assertThrows(BusinessException.class, () -> {
             accountService.createAccount("testuser", null);
@@ -239,13 +236,8 @@ class AccountServiceTest {
         updateRequest.setCurrency("PLN");
         updateRequest.setAccountType("CHECKING");
 
-        Account existingAccount = new Account();
-        existingAccount.setId(2L);
-        existingAccount.setAccountNumber("PL987654321098765432109876");
-        existingAccount.setAccountName("Test Account");
-        existingAccount.setUser(testUser);
-
         when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(testAccount);
 
         // Act
         AccountDTO result = accountService.updateAccount(1L, updateRequest, "testuser");
@@ -253,5 +245,6 @@ class AccountServiceTest {
         // Assert
         assertNotNull(result);
         verify(accountRepository, times(1)).findById(1L);
+        verify(accountRepository, times(1)).save(any(Account.class));
     }
 }

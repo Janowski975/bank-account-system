@@ -57,7 +57,7 @@ class AuthControllerIntegrationTest {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("newuser");
         request.setEmail("newuser@example.com");
-        request.setPassword("password123");
+        request.setPassword("Password123");
         request.setFullName("New User");
 
         // Act & Assert
@@ -79,7 +79,7 @@ class AuthControllerIntegrationTest {
         User testUser = new User();
         testUser.setUsername("loginuser");
         testUser.setEmail("loginuser@example.com");
-        testUser.setPassword(passwordEncoder.encode("password123"));
+        testUser.setPassword(passwordEncoder.encode("Password123"));
         testUser.setFullName("Login User");
         testUser.setRole("USER");
         testUser.setIsActive(true);
@@ -87,7 +87,7 @@ class AuthControllerIntegrationTest {
 
         LoginRequest request = new LoginRequest();
         request.setUsername("loginuser");
-        request.setPassword("password123");
+        request.setPassword("Password123");
 
         // Act & Assert
         mockMvc.perform(post("/auth/login")
@@ -107,7 +107,7 @@ class AuthControllerIntegrationTest {
         User testUser = new User();
         testUser.setUsername("invaliduser");
         testUser.setEmail("invaliduser@example.com");
-        testUser.setPassword(passwordEncoder.encode("password123"));
+        testUser.setPassword(passwordEncoder.encode("Password123"));
         testUser.setFullName("Invalid User");
         testUser.setRole("USER");
         testUser.setIsActive(true);
@@ -131,7 +131,7 @@ class AuthControllerIntegrationTest {
         User existingUser = new User();
         existingUser.setUsername("duplicateuser");
         existingUser.setEmail("duplicate@example.com");
-        existingUser.setPassword(passwordEncoder.encode("password123"));
+        existingUser.setPassword(passwordEncoder.encode("Password123"));
         existingUser.setFullName("Existing User");
         existingUser.setRole("USER");
         existingUser.setIsActive(true);
@@ -140,7 +140,7 @@ class AuthControllerIntegrationTest {
         RegisterRequest request = new RegisterRequest();
         request.setUsername("duplicateuser");
         request.setEmail("newemail@example.com");
-        request.setPassword("password123");
+        request.setPassword("Password123");
         request.setFullName("Duplicate User");
 
         // Act & Assert

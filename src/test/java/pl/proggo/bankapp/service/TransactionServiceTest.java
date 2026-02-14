@@ -210,8 +210,8 @@ class TransactionServiceTest {
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             transactionService.createTransaction(1L, transactionRequest, "testuser");
         });
-        assertTrue(exception.getMessage().contains("Amount must be positive") ||
-                   exception.getMessage().contains("negative"));
+        assertTrue(exception.getMessage().contains("Transaction amount must be greater than zero") ||
+                   exception.getMessage().contains("Amount must be greater than 0"));
         verify(accountRepository, times(1)).findById(1L);
         verify(transactionRepository, never()).save(any(Transaction.class));
     }

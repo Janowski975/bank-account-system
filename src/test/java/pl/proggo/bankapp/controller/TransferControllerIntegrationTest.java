@@ -86,7 +86,7 @@ class TransferControllerIntegrationTest {
 
         // Create test accounts
         fromAccount = new Account();
-        fromAccount.setAccountNumber("PL11111111111111111111111111");
+        fromAccount.setAccountNumber("PL11111111111111111111");
         fromAccount.setAccountName("From Account");
         fromAccount.setUser(testUser);
         fromAccount.setBalance(new BigDecimal("1000.00"));
@@ -96,7 +96,7 @@ class TransferControllerIntegrationTest {
         fromAccount = accountRepository.save(fromAccount);
 
         toAccount = new Account();
-        toAccount.setAccountNumber("PL22222222222222222222222222");
+        toAccount.setAccountNumber("PL22222222222222222222");
         toAccount.setAccountName("To Account");
         toAccount.setUser(otherUser);
         toAccount.setBalance(new BigDecimal("500.00"));
@@ -112,8 +112,8 @@ class TransferControllerIntegrationTest {
     void testTransferMoney_Success() throws Exception {
         // Arrange
         TransferRequest request = new TransferRequest();
-        request.setFromAccountNumber("PL11111111111111111111111111");
-        request.setToAccountNumber("PL22222222222222222222222222");
+        request.setFromAccountNumber("PL11111111111111111111");
+        request.setToAccountNumber("PL22222222222222222222");
         request.setAmount(new BigDecimal("100.00"));
         request.setDescription("Test transfer");
 
@@ -122,8 +122,8 @@ class TransferControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.fromAccountNumber").value("PL11111111111111111111111111"))
-                .andExpect(jsonPath("$.toAccountNumber").value("PL22222222222222222222222222"))
+                .andExpect(jsonPath("$.fromAccountNumber").value("PL11111111111111111111"))
+                .andExpect(jsonPath("$.toAccountNumber").value("PL22222222222222222222"))
                 .andExpect(jsonPath("$.amount").value(100.00))
                 .andExpect(jsonPath("$.status").value("COMPLETED"))
                 .andExpect(jsonPath("$.referenceNumber").exists());
@@ -135,8 +135,8 @@ class TransferControllerIntegrationTest {
     void testTransferMoney_InsufficientFunds() throws Exception {
         // Arrange
         TransferRequest request = new TransferRequest();
-        request.setFromAccountNumber("PL11111111111111111111111111");
-        request.setToAccountNumber("PL22222222222222222222222222");
+        request.setFromAccountNumber("PL11111111111111111111");
+        request.setToAccountNumber("PL22222222222222222222");
         request.setAmount(new BigDecimal("2000.00"));
         request.setDescription("Test transfer");
 
@@ -153,8 +153,8 @@ class TransferControllerIntegrationTest {
     void testTransferMoney_SameAccount() throws Exception {
         // Arrange
         TransferRequest request = new TransferRequest();
-        request.setFromAccountNumber("PL11111111111111111111111111");
-        request.setToAccountNumber("PL11111111111111111111111111");
+        request.setFromAccountNumber("PL11111111111111111111");
+        request.setToAccountNumber("PL11111111111111111111");
         request.setAmount(new BigDecimal("100.00"));
         request.setDescription("Test transfer");
 
@@ -171,8 +171,8 @@ class TransferControllerIntegrationTest {
     void testGetTransferDetails_Success() throws Exception {
         // Arrange - Create a transfer first
         TransferRequest request = new TransferRequest();
-        request.setFromAccountNumber("PL11111111111111111111111111");
-        request.setToAccountNumber("PL22222222222222222222222222");
+        request.setFromAccountNumber("PL11111111111111111111");
+        request.setToAccountNumber("PL22222222222222222222");
         request.setAmount(new BigDecimal("100.00"));
         request.setDescription("Test transfer");
 
@@ -190,8 +190,8 @@ class TransferControllerIntegrationTest {
         mockMvc.perform(get("/transfers/" + transferId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(transferId))
-                .andExpect(jsonPath("$.fromAccountNumber").value("PL11111111111111111111111111"))
-                .andExpect(jsonPath("$.toAccountNumber").value("PL22222222222222222222222222"));
+                .andExpect(jsonPath("$.fromAccountNumber").value("PL11111111111111111111"))
+                .andExpect(jsonPath("$.toAccountNumber").value("PL22222222222222222222"));
     }
 
     @Test
@@ -200,8 +200,8 @@ class TransferControllerIntegrationTest {
     void testGetAccountTransfers_Success() throws Exception {
         // Arrange - Create a transfer first
         TransferRequest request = new TransferRequest();
-        request.setFromAccountNumber("PL11111111111111111111111111");
-        request.setToAccountNumber("PL22222222222222222222222222");
+        request.setFromAccountNumber("PL11111111111111111111");
+        request.setToAccountNumber("PL22222222222222222222");
         request.setAmount(new BigDecimal("100.00"));
         request.setDescription("Test transfer");
 
@@ -211,10 +211,10 @@ class TransferControllerIntegrationTest {
                 .andExpect(status().isCreated());
 
         // Act & Assert
-        mockMvc.perform(get("/transfers/account/PL11111111111111111111111111"))
+        mockMvc.perform(get("/transfers/account/PL11111111111111111111"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[0].fromAccountNumber").value("PL11111111111111111111111111"));
+                .andExpect(jsonPath("$.content[0].fromAccountNumber").value("PL11111111111111111111"));
     }
 
     @Test
@@ -222,8 +222,8 @@ class TransferControllerIntegrationTest {
     void testTransferMoney_WithoutAuth() throws Exception {
         // Arrange
         TransferRequest request = new TransferRequest();
-        request.setFromAccountNumber("PL11111111111111111111111111");
-        request.setToAccountNumber("PL22222222222222222222222222");
+        request.setFromAccountNumber("PL11111111111111111111");
+        request.setToAccountNumber("PL22222222222222222222");
         request.setAmount(new BigDecimal("100.00"));
         request.setDescription("Test transfer");
 
