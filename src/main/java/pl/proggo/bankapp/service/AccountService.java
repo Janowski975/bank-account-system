@@ -32,6 +32,10 @@ public class AccountService {
     public AccountDTO createAccount(String username, CreateAccountRequest request) {
         log.info("Creating account for user: {}", username);
 
+        if (request == null) {
+            throw new BusinessException("Account request cannot be null");
+        }
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
 

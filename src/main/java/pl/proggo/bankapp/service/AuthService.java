@@ -38,6 +38,25 @@ public class AuthService {
             throw new BusinessException("Email already exists: " + request.getEmail());
         }
 
+        // Validate email format
+        if (!request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new BusinessException("Invalid email format");
+        }
+
+        // Validate password strength
+        if (request.getPassword() == null || request.getPassword().length() < 8) {
+            throw new BusinessException("Password must be at least 8 characters long");
+        }
+        if (!request.getPassword().matches(".*[A-Z].*")) {
+            throw new BusinessException("Password must contain at least one uppercase letter");
+        }
+        if (!request.getPassword().matches(".*[a-z].*")) {
+            throw new BusinessException("Password must contain at least one lowercase letter");
+        }
+        if (!request.getPassword().matches(".*\\d.*")) {
+            throw new BusinessException("Password must contain at least one number");
+        }
+
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -68,12 +87,12 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new BusinessException("Invalid username or password"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BusinessException("Invalid username or password");
+        if (!user.getIsActive()) {
+            throw new BusinessException("Account is locked or inactive");
         }
 
-        if (!user.getIsActive()) {
-            throw new BusinessException("User account is inactive");
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BusinessException("Invalid username or password");
         }
 
         String accessToken = jwtUtils.generateAccessToken(user.getUsername());
