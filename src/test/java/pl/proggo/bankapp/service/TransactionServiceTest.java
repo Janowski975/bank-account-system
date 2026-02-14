@@ -218,7 +218,7 @@ class TransactionServiceTest {
 
     @Test
     @DisplayName("Should throw BusinessException when creating transaction with invalid type")
-    void testCreateTransaction_WithSameAccountTransfer() {
+    void testCreateTransaction_WithInvalidTransactionType() {
         // Arrange
         transactionRequest.setType("TRANSFER");
         when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));

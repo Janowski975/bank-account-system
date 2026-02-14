@@ -87,12 +87,12 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new BusinessException("Invalid username or password"));
 
-        if (!user.getIsActive()) {
-            throw new BusinessException("Account is locked or inactive");
-        }
-
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BusinessException("Invalid username or password");
+        }
+
+        if (!user.getIsActive()) {
+            throw new BusinessException("Account is locked or inactive");
         }
 
         String accessToken = jwtUtils.generateAccessToken(user.getUsername());

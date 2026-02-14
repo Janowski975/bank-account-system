@@ -262,7 +262,7 @@ class AccountControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return 409 when creating account with duplicate account number")
+    @DisplayName("Should handle multiple account creation successfully")
     @WithMockUser(username = "testuser", roles = {"USER"})
     void testCreateAccount_WithDuplicateAccountNumber() throws Exception {
         // Arrange - Create first account
@@ -276,7 +276,7 @@ class AccountControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
-        // Act & Assert - Try to create another account (should succeed with different account number)
+        // Act & Assert - Create second account with auto-generated unique account number
         mockMvc.perform(post("/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
