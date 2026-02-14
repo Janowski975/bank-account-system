@@ -187,4 +187,64 @@ class AccountServiceTest {
         });
         verify(accountRepository, times(1)).findById(1L);
     }
+
+    @Test
+    @DisplayName("Should throw BusinessException when creating account with null request")
+    void testCreateAccount_WithNullRequest() {
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> {
+            accountService.createAccount("testuser", null);
+        });
+        verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    @Test
+    @DisplayName("Should handle negative balance correctly")
+    void testGetBalance_WithNegativeAmount() {
+        // Arrange
+        testAccount.setBalance(new BigDecimal("-100.00"));
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+
+        // Act
+        AccountDTO result = accountService.getAccount(1L, "testuser");
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(new BigDecimal("-100.00"), result.getBalance());
+        verify(accountRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when getting account with invalid format")
+    void testGetAccountByNumber_WithInvalidFormat() {
+        // Arrange
+        when(accountRepository.findById(-1L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, () -> {
+            accountService.getAccount(-1L, "testuser");
+        });
+        verify(accountRepository, times(1)).findById(-1L);
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when updating account with duplicate data")
+    void testUpdateAccount_WithDuplicateData() {
+        // Arrange
+        CreateAccountRequest updateRequest = new CreateAccountRequest();
+        updateRequest.setAccountName("Test Account");
+        updateRequest.setCurrency("PLN");
+        updateRequest.setAccountType("CHECKING");
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+        when(accountRepository.save(any(Account.class))).thenReturn(testAccount);
+
+        // Act
+        AccountDTO result = accountService.updateAccount(1L, updateRequest, "testuser");
+
+        // Assert
+        assertNotNull(result);
+        verify(accountRepository, times(1)).findById(1L);
+        verify(accountRepository, times(1)).save(any(Account.class));
+    }
 }

@@ -198,4 +198,58 @@ class TransactionServiceTest {
         verify(accountRepository, times(1)).findById(1L);
         verify(transactionRepository, never()).save(any(Transaction.class));
     }
+
+    @Test
+    @DisplayName("Should throw BusinessException when creating transaction with negative amount")
+    void testCreateTransaction_WithNegativeAmount() {
+        // Arrange
+        transactionRequest.setAmount(new BigDecimal("-100.00"));
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            transactionService.createTransaction(1L, transactionRequest, "testuser");
+        });
+        assertTrue(exception.getMessage().contains("Transaction amount must be greater than zero") ||
+                   exception.getMessage().contains("Amount must be greater than 0"));
+        verify(accountRepository, times(1)).findById(1L);
+        verify(transactionRepository, never()).save(any(Transaction.class));
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when creating transaction with invalid type")
+    void testCreateTransaction_WithInvalidTransactionType() {
+        // Arrange
+        transactionRequest.setType("TRANSFER");
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            transactionService.createTransaction(1L, transactionRequest, "testuser");
+        });
+        assertTrue(exception.getMessage().contains("Invalid transaction type") ||
+                   exception.getMessage().contains("TRANSFER"));
+        verify(accountRepository, times(1)).findById(1L);
+        verify(transactionRepository, never()).save(any(Transaction.class));
+    }
+
+    @Test
+    @DisplayName("Should handle concurrent access to transactions")
+    void testGetTransactionsByAccount_WithConcurrentAccess() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Transaction> transactionPage = new PageImpl<>(Collections.singletonList(testTransaction));
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+        when(transactionRepository.findByAccountId(anyLong(), any(Pageable.class))).thenReturn(transactionPage);
+
+        // Act
+        Page<TransactionDTO> result = transactionService.getAccountTransactions(1L, "testuser", pageable);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(accountRepository, times(1)).findById(1L);
+        verify(transactionRepository, times(1)).findByAccountId(anyLong(), any(Pageable.class));
+    }
 }

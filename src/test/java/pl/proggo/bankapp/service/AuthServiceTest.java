@@ -49,12 +49,12 @@ class AuthServiceTest {
         registerRequest = new RegisterRequest();
         registerRequest.setUsername("newuser");
         registerRequest.setEmail("newuser@example.com");
-        registerRequest.setPassword("password123");
+        registerRequest.setPassword("Password123");
         registerRequest.setFullName("New User");
 
         loginRequest = new LoginRequest();
         loginRequest.setUsername("testuser");
-        loginRequest.setPassword("password123");
+        loginRequest.setPassword("Password123");
 
         testUser = new User();
         testUser.setId(1L);
@@ -72,7 +72,7 @@ class AuthServiceTest {
         // Arrange
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(userRepository.existsByEmail("newuser@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
+        when(passwordEncoder.encode("Password123")).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(testUser);
         when(jwtUtils.generateAccessToken("testuser")).thenReturn("accessToken");
         when(jwtUtils.generateRefreshToken("testuser")).thenReturn("refreshToken");
@@ -114,7 +114,7 @@ class AuthServiceTest {
     void testLogin_Success() {
         // Arrange
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(true);
+        when(passwordEncoder.matches("Password123", "encodedPassword")).thenReturn(true);
         when(jwtUtils.generateAccessToken("testuser")).thenReturn("accessToken");
         when(jwtUtils.generateRefreshToken("testuser")).thenReturn("refreshToken");
 
@@ -128,7 +128,7 @@ class AuthServiceTest {
         assertEquals("testuser", result.getUsername());
         assertEquals("test@example.com", result.getEmail());
         verify(userRepository, times(1)).findByUsername("testuser");
-        verify(passwordEncoder, times(1)).matches("password123", "encodedPassword");
+        verify(passwordEncoder, times(1)).matches("Password123", "encodedPassword");
         verify(jwtUtils, times(1)).generateAccessToken("testuser");
         verify(jwtUtils, times(1)).generateRefreshToken("testuser");
     }
@@ -157,7 +157,7 @@ class AuthServiceTest {
     void testGenerateToken_Success() {
         // Arrange
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(true);
+        when(passwordEncoder.matches("Password123", "encodedPassword")).thenReturn(true);
         when(jwtUtils.generateAccessToken("testuser")).thenReturn("generatedAccessToken");
         when(jwtUtils.generateRefreshToken("testuser")).thenReturn("generatedRefreshToken");
 
@@ -184,5 +184,73 @@ class AuthServiceTest {
         });
         assertTrue(exception.getMessage().contains("Invalid username or password"));
         verify(userRepository, times(1)).findByUsername("testuser");
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when registering with weak password")
+    void testRegister_WithWeakPassword() {
+        // Arrange
+        registerRequest.setPassword("weak");
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authService.register(registerRequest);
+        });
+        assertTrue(exception.getMessage().contains("Password must be at least 8 characters") ||
+                   exception.getMessage().contains("Password does not meet requirements"));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when registering with invalid email format")
+    void testRegister_WithInvalidEmailFormat() {
+        // Arrange
+        registerRequest.setEmail("invalid-email");
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authService.register(registerRequest);
+        });
+        assertTrue(exception.getMessage().contains("Invalid email format") ||
+                   exception.getMessage().contains("email"));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when logging in with locked account")
+    void testLogin_WithLockedAccount() {
+        // Arrange
+        testUser.setIsActive(false);
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches("Password123", "encodedPassword")).thenReturn(true);
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authService.login(loginRequest);
+        });
+        assertTrue(exception.getMessage().contains("Account is locked") ||
+                   exception.getMessage().contains("Account is") ||
+                   exception.getMessage().contains("inactive"));
+        verify(userRepository, times(1)).findByUsername("testuser");
+        verify(jwtUtils, never()).generateAccessToken(anyString());
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when generating token for expired user")
+    void testGenerateToken_WithExpiredUser() {
+        // Arrange
+        testUser.setIsActive(false);
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(passwordEncoder.matches("Password123", "encodedPassword")).thenReturn(true);
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            authService.login(loginRequest);
+        });
+        assertTrue(exception.getMessage().contains("Account is locked") ||
+                   exception.getMessage().contains("Account is") ||
+                   exception.getMessage().contains("inactive"));
+        verify(userRepository, times(1)).findByUsername("testuser");
+        verify(jwtUtils, never()).generateAccessToken(anyString());
     }
 }
