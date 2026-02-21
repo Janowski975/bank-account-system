@@ -1,5 +1,7 @@
 # Bank Account Management System
 
+[![Tests](https://github.com/Janowski975/bank-account-system/actions/workflows/tests.yml/badge.svg)](https://github.com/Janowski975/bank-account-system/actions)
+
 REST API do zarządzania kontami bankowymi z autentykacją JWT.
 
 ## Opis
@@ -329,6 +331,28 @@ curl -X GET http://localhost:8080/api/accounts \
 | SLF4J | (included) | Logging Framework |
 | Maven | 3.9.12 | Build Tool |
 | Java | 23 | Programming Language |
+
+## Continuous Integration
+
+GitHub Actions automatically:
+- ✅ Runs all tests on every push to master/main/develop
+- ✅ Generates code coverage reports with JaCoCo
+- ✅ Uploads coverage to Codecov
+- ✅ Comments on Pull Requests with results
+
+#### Run Tests Locally
+
+```bash
+mvn clean test
+```
+
+#### View Code Coverage
+```bash
+mvn jacoco:report
+open target/site/jacoco/index.html
+```
+
+See: [GitHub Actions](https://github.com/Janowski975/bank-account-system/actions)
 
 ## Licencja
 
