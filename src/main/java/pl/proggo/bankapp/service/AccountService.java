@@ -2,6 +2,7 @@ package pl.proggo.bankapp.service;
 
 import pl.proggo.bankapp.dto.AccountDTO;
 import pl.proggo.bankapp.dto.CreateAccountRequest;
+import pl.proggo.bankapp.dto.DepositRequest;
 import pl.proggo.bankapp.entity.Account;
 import pl.proggo.bankapp.entity.User;
 import pl.proggo.bankapp.exception.BusinessException;
@@ -104,6 +105,38 @@ public class AccountService {
         log.info("Account updated: {}", accountId);
 
         return mapToDTO(updatedAccount);
+    }
+
+    /**
+     * Deposit money into account.
+     *
+     * @param accountId Account ID
+     * @param request Deposit request
+     * @param username Username
+     * @return Updated AccountDTO
+     */
+    public AccountDTO depositMoney(Long accountId, DepositRequest request, String username) {
+        log.info("Processing deposit for account: {} by user: {}", accountId, username);
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found: " + accountId));
+
+        // Validate ownership
+        if (!account.getUser().getUsername().equals(username)) {
+            throw new BusinessException("User is not authorized to deposit to this account");
+        }
+
+        // Validate account is active
+        if (!account.getIsActive()) {
+            throw new BusinessException("Account is not active");
+        }
+
+        // Add amount to balance
+        account.setBalance(account.getBalance().add(request.getAmount()));
+        accountRepository.save(account);
+
+        log.info("Deposit completed for account: {}", accountId);
+        return mapToDTO(account);
     }
 
     public void deleteAccount(Long accountId, String username) {

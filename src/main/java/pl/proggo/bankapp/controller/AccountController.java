@@ -2,6 +2,7 @@ package pl.proggo.bankapp.controller;
 
 import pl.proggo.bankapp.dto.AccountDTO;
 import pl.proggo.bankapp.dto.CreateAccountRequest;
+import pl.proggo.bankapp.dto.DepositRequest;
 import pl.proggo.bankapp.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,17 @@ public class AccountController {
     public ResponseEntity<List<AccountDTO>> getUserAccounts(Authentication authentication) {
         log.info("Get user accounts endpoint called for user: {}", authentication.getName());
         List<AccountDTO> response = accountService.getUserAccounts(authentication.getName());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/deposit")
+    public ResponseEntity<AccountDTO> depositMoney(
+            @PathVariable Long id,
+            @Valid @RequestBody DepositRequest request,
+            Authentication authentication) {
+
+        log.info("Deposit endpoint called for account: {}", id);
+        AccountDTO response = accountService.depositMoney(id, request, authentication.getName());
         return ResponseEntity.ok(response);
     }
 

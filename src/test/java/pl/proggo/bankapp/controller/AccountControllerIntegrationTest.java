@@ -129,7 +129,7 @@ class AccountControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        Long accountId = objectMapper.readTree(createResponse).get("id").asLong();
+        long accountId = objectMapper.readTree(createResponse).get("id").asLong();
 
         // Act & Assert
         mockMvc.perform(get("/accounts/" + accountId))
@@ -155,7 +155,7 @@ class AccountControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        Long accountId = objectMapper.readTree(createResponse).get("id").asLong();
+        long accountId = objectMapper.readTree(createResponse).get("id").asLong();
 
         // Prepare update request
         CreateAccountRequest updateRequest = new CreateAccountRequest();
@@ -230,7 +230,7 @@ class AccountControllerIntegrationTest {
     @DisplayName("Should return 403 when updating account as unauthorized user")
     @WithMockUser(username = "differentuser", roles = {"USER"})
     void testUpdateAccount_WithUnauthorizedUser() throws Exception {
-        // Arrange - Create an account first with testuser
+        // Arrange - Create an account first with test user
         testUser = userRepository.findByUsername("testuser").orElseThrow();
 
         CreateAccountRequest createRequest = new CreateAccountRequest();
